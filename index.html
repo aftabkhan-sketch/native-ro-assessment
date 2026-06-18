@@ -361,13 +361,15 @@ async function submitAll(){
       }
     };
 
+   // We remove the headers entry completely. This allows the request to pass browser cross-origin filters without error.
     const response = await fetch(BACKEND_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' }, // Using text/plain to entirely prevent CORS pre-flight pre-processing checks in Google Macro scripts
       body: JSON.stringify(payload)
     });
 
-    const resData = await response.json();
+    // Google Apps Script requires text processing before parsing json format directly
+    const rawTextResponse = await response.text();
+    const resData = JSON.parse(rawTextResponse);
     if(resData.status === 'error') throw new Error(resData.message);
 
     setProgress(100,'Upload package verified!');
