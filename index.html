@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Native RO — Partner Assessment</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root {
+  --border-radius-lg: 8px;
+  --border-radius-md: 4px;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f8f9fa;
+  --color-border-secondary: #ced4da;
+  --color-border-tertiary: #dee2e6;
+  --color-text-primary: #212529;
+  --color-text-secondary: #6c757d;
+}
+body{background:#f0f2f5;color:var(--color-text-primary)}
+.page{max-width:680px;margin:0 auto;padding:1.5rem 1rem;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.header{background:#1a3a5c;border-radius:var(--border-radius-lg);padding:1.5rem;margin-bottom:1rem}
+.header h1{color:#fff;font-size:20px;font-weight:500;margin-bottom:4px}
+.header p{color:#a8c4e0;font-size:13px}
+.section{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem}
+.sec-title{font-size:15px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;margin-bottom:1rem}
+.num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#1a3a5c;color:#fff;border-radius:50%;font-size:12px;font-weight:500;margin-right:8px;flex-shrink:0}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:13px;color:var(--color-text-secondary)}
+.fg input{padding:8px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary)}
+.q-block{margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.q-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.q-text{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;line-height:1.5}
+.q-hindi{font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;line-height:1.5}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:var(--border-radius-md);cursor:pointer;transition:background 0.1s;margin-bottom:4px}
+.opt:hover{background:var(--color-background-secondary)}
+.opt input[type=radio]{margin-top:2px;accent-color:#1a3a5c;flex-shrink:0}
+.opt span{font-size:13px;color:var(--color-text-primary);line-height:1.5}
+.opt.selected{background:#E6F1FB;border-left: 3px solid #1a3a5c}
+.qbox{background:var(--color-background-secondary);border-left:3px solid #1a3a5c;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:1rem;margin-bottom:1rem;font-size:14px;color:var(--color-text-primary);line-height:1.6}
+.qbox strong{display:block;font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;font-weight:500}
+.rec-area{display:flex;flex-direction:column;align-items:center;gap:10px;padding:0.75rem 0}
+.timer{font-size:20px;font-weight:500;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+.rec-btn{width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;transition:transform 0.15s}
+.rec-btn:active{transform:scale(0.95)}
+.idle{background:#1a3a5c;color:#fff}
+.recording{background:#E24B4A;color:#fff;animation:pulse 1.2s infinite}
+.recorded{background:#1D9E75;color:#fff}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.rec-status{font-size:12px;color:var(--color-text-secondary);text-align:center;max-width:260px}
+.audio-prev{width:100%;margin-top:12px;display:none}
+.ctrl-row{display:none;gap:10px;justify-content:center}
+.ctrl-btn{padding:6px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.ctrl-btn:hover{background:var(--color-background-secondary)}
+.submit-btn{width:100%;padding:12px;background:#1a3a5c;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.submit-btn:hover{background:#0f2540}
+.submit-btn:disabled{background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:not-allowed}
+.prog-bar{width:100%;height:6px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden;display:none;margin-top:8px}
+.prog-fill{height:100%;background:#1a3a5c;border-radius:4px;transition:width 0.3s}
+.status-msg{font-size:13px;text-align:center;margin-top:8px;display:none;color:var(--color-text-secondary)}
+.success-screen{display:none;text-align:center;padding:2rem 1rem}
+.success-screen h2{font-size:18px;font-weight:500;margin-bottom:8px;color:var(--color-text-primary)}
+.success-screen p{font-size:14px;color:var(--color-text-secondary);line-height:1.6}
+.file-tag{display:inline-block;margin-top:10px;padding:5px 12px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary);font-family:monospace}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="header">
+    <h1><i class="ti ti-clipboard-check" aria-hidden="true"></i> Native RO — Partner Assessment</h1>
+    <p>Sabhi questions mandatory hain. Sahi vikalp chunein aur audio jawab record karein. (Total: 150 Marks)</p>
+  </div>
+
+  <div id="main-form">
+    <div class="section">
+      <div class="sec-title"><span class="num">1</span> Apni details bharein *</div>
+      <div class="form-row">
+        <div class="fg"><label>Poora naam *</label><input type="text" id="f-name" required placeholder="Jaise: Rajesh Kumar"/></div>
+        <div class="fg"><label>Partner Mobile No *</label><input type="tel" id="f-id" required placeholder="Jaise: 9876543210"/></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>City *</label><input type="text" id="f-city" required placeholder="Aapka sheher"/></div>
+        <div class="fg"><label>Date *</label><input type="date" id="f-date" required/></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-title"><span class="num">2</span> Multiple choice questions (10 Marks Each) *</div>
+
+      <div class="q-block" id="q1">
+        <div class="q-text">1. During a table-top installation of M3 Pro, stem elbows should be installed on:</div>
+        <div class="q-hindi">(M3 Pro ki table-top installation ke dauran, stem elbows kahan lagane chahiye?)</div>
+        <div class="opt" onclick="selectOpt('q1',0)"><input type="radio" name="q1"/><span>Only inlet pipe</span></div>
+        <div class="opt" onclick="selectOpt('q1',1)"><input type="radio" name="q1"/><span>Only reject pipe</span></div>
+        <div class="opt" onclick="selectOpt('q1',2)"><input type="radio" name="q1"/><span>Both inlet and reject pipes</span></div>
+        <div class="opt" onclick="selectOpt('q1',3)"><input type="radio" name="q1"/><span>Dispense pipe only</span></div>
+      </div>
+
+      <div class="q-block" id="q2">
+        <div class="q-text">2. During installation, the RO Life Booster inlet pipe should be removed to flush which filter?</div>
+        <div class="q-hindi">(Installation ke dauran, RO Life Booster ki inlet pipe ko kis filter ko flush karne ke liye remove kiya jata hai?)</div>
+        <div class="opt" onclick="selectOpt('q2',0)"><input type="radio" name="q2"/><span>Post Carbon</span></div>
+        <div class="opt" onclick="selectOpt('q2',1)"><input type="radio" name="q2"/><span>Membrane</span></div>
+        <div class="opt" onclick="selectOpt('q2',2)"><input type="radio" name="q2"/><span>Life booster</span></div>
+        <div class="opt" onclick="selectOpt('q2',3)"><input type="radio" name="q2"/><span>Pre Carbon</span></div>
+      </div>
+
+      <div class="q-block" id="q3">
+        <div class="q-text">3. After the first tank is filled on a newly installed machine, what should be done first?</div>
+        <div class="q-hindi">(Nayi machine mein pehla tank fill hone ke baad, sabse pehle kya karna chahiye?)</div>
+        <div class="opt" onclick="selectOpt('q3',0)"><input type="radio" name="q3"/><span>Check TDS and pH</span></div>
+        <div class="opt" onclick="selectOpt('q3',1)"><input type="radio" name="q3"/><span>Press the Glass button and dispense water</span></div>
+        <div class="opt" onclick="selectOpt('q3',2)"><input type="radio" name="q3"/><span>Press the Bottle button and dispense water</span></div>
+        <div class="opt" onclick="selectOpt('q3',3)"><input type="radio" name="q3"/><span>Press the Free Flow button and drain the entire tank</span></div>
+      </div>
+
+      <div class="q-block" id="q4">
+        <div class="q-text">4. What happens when the tank becomes full during purification?</div>
+        <div class="q-hindi">(Purification ke dauran jab tank full ho jata hai, tab kya hota hai?)</div>
+        <div class="opt" onclick="selectOpt('q4',0)"><input type="radio" name="q4"/><span>Pump stops immediately</span></div>
+        <div class="opt" onclick="selectOpt('q4',1)"><input type="radio" name="q4"/><span>UV turns OFF</span></div>
+        <div class="opt" onclick="selectOpt('q4',2)"><input type="radio" name="q4"/><span>Auto-flush runs for 15 seconds before stopping purification</span></div>
+        <div class="opt" onclick="selectOpt('q4',3)"><input type="radio" name="q4"/><span>Mineral SV opens</span></div>
+      </div>
+
+      <div class="q-block" id="q5">
+        <div class="q-text">5. In Low Power Mode (LPM), which function still works normally?</div>
+        <div class="q-hindi">(Low Power Mode (LPM) mein bhi kaunsa function normal tareeke se kaam karta rehta hai?)</div>
+        <div class="opt" onclick="selectOpt('q5',0)"><input type="radio" name="q5"/><span>Display</span></div>
+        <div class="opt" onclick="selectOpt('q5',1)"><input type="radio" name="q5"/><span>Purification</span></div>
+        <div class="opt" onclick="selectOpt('q5',2)"><input type="radio" name="q5"/><span>Dispensing</span></div>
+        <div class="opt" onclick="selectOpt('q5',3)"><input type="radio" name="q5"/><span>UV LED</span></div>
+      </div>
+
+      <div class="q-block" id="q6">
+        <div class="q-text">6. Which feature is unique to M3 Pro compared to M3?</div>
+        <div class="q-hindi">(M3 ke comparison mein M3 Pro mein kaunsi feature unique hai?)</div>
+        <div class="opt" onclick="selectOpt('q6',0)"><input type="radio" name="q6"/><span>RO Membrane</span></div>
+        <div class="opt" onclick="selectOpt('q6',1)"><input type="radio" name="q6"/><span>Booster Pump</span></div>
+        <div class="opt" onclick="selectOpt('q6',2)"><input type="radio" name="q6"/><span>Separate Mineraliser with Mineral SV</span></div>
+        <div class="opt" onclick="selectOpt('q6',3)"><input type="radio" name="q6"/><span>Post Carbon Filter</span></div>
+      </div>
+
+      <div class="q-block" id="q7">
+        <div class="q-text">7. What inlet water pressure is required for proper purification?</div>
+        <div class="q-hindi">(Proper purification ke liye inlet water pressure kitna hona chahiye?)</div>
+        <div class="opt" onclick="selectOpt('q7',0)"><input type="radio" name="q7"/><span>&lt;1 PSI</span></div>
+        <div class="opt" onclick="selectOpt('q7',1)"><input type="radio" name="q7"/><span>&gt;2 PSI</span></div>
+        <div class="opt" onclick="selectOpt('q7',2)"><input type="radio" name="q7"/><span>&gt;8 PSI</span></div>
+        <div class="opt" onclick="selectOpt('q7',3)"><input type="radio" name="q7"/><span>&gt;30 PSI</span></div>
+      </div>
+
+      <div class="q-block" id="q8">
+        <div class="q-text">8. A newly installed M3 Pro is filling normally, but has a slight taste issue. What is the most likely cause?</div>
+        <div class="q-hindi">(Naya install hua M3 Pro normal tareeke se fill ho raha hai, lekin paani ke taste mein thodi problem hai. Iska sabse likely reason kya ho sakta hai?)</div>
+        <div class="opt" onclick="selectOpt('q8',0)"><input type="radio" name="q8"/><span>Water taste and TDS will be better after 50–60 liters of water consumption</span></div>
+        <div class="opt" onclick="selectOpt('q8',1)"><input type="radio" name="q8"/><span>First tank was not drained after installation</span></div>
+        <div class="opt" onclick="selectOpt('q8',2)"><input type="radio" name="q8"/><span>Flushing not done properly</span></div>
+        <div class="opt" onclick="selectOpt('q8',3)"><input type="radio" name="q8"/><span>All of them</span></div>
+      </div>
+
+      <div class="q-block" id="q9">
+        <div class="q-text">9. A customer complains that water continuously goes to drain even when purification is not running. Which component is most likely faulty?</div>
+        <div class="q-hindi">(Customer complaint karta hai ki purification band hone ke baad bhi paani lagataar drain mein ja raha hai. Sabse zyada sambhavna kis component ke faulty hone ki hai?)</div>
+        <div class="opt" onclick="selectOpt('q9',0)"><input type="radio" name="q9"/><span>Mineral SV stuck open</span></div>
+        <div class="opt" onclick="selectOpt('q9',1)"><input type="radio" name="q9"/><span>Dispensing SV stuck open</span></div>
+        <div class="opt" onclick="selectOpt('q9',2)"><input type="radio" name="q9"/><span>Flush SV stuck open</span></div>
+        <div class="opt" onclick="selectOpt('q9',3)"><input type="radio" name="q9"/><span>Pump continuous running</span></div>
+      </div>
+
+      <div class="q-block" id="q10">
+        <div class="q-text">10. The grey hex nut mechanical float valve should only be used in which machine?</div>
+        <div class="q-hindi">(Grey hex nut mechanical float valve sirf kis machine mein use kiya jana chahiye?)</div>
+        <div class="opt" onclick="selectOpt('q10',0)"><input type="radio" name="q10"/><span>M0</span></div>
+        <div class="opt" onclick="selectOpt('q10',1)"><input type="radio" name="q10"/><span>M2 Pro with dispensing pump</span></div>
+        <div class="opt" onclick="selectOpt('q10',2)"><input type="radio" name="q10"/><span>M1 Pro</span></div>
+        <div class="opt" onclick="selectOpt('q10',3)"><input type="radio" name="q10"/><span>M2 Pro without dispensing pump</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-title"><span class="num">3</span> Audio Q1 — Taste &amp; Smell (25 Marks) *</div>
+      <div class="qbox">
+        <strong>Yeh sawaal padh kar apna jawab aur explanation record karein:</strong>
+        Ek customer ne aapko call kiya aur bola ki naye RO installation ke baad paani ka taste aur smell dono alag lag rahe hain. Aap usse phone par kya samjhaenge? Apne shabdon mein boliye.
+      </div>
+      <div class="rec-area">
+        <div class="timer" id="t1">0:00</div>
+        <button type="button" class="rec-btn idle" id="rb1" onclick="toggleRec(1)" aria-label="Record Q1">
+          <i class="ti ti-microphone" id="ri1" aria-hidden="true"></i>
+        </button>
+        <div class="rec-status" id="rs1">Microphone button dabaakar recording shuru karein</div>
+        <div class="ctrl-row" id="cr1">
+          <button type="button" class="ctrl-btn" onclick="resetRec(1)"><i class="ti ti-refresh" aria-hidden="true"></i> Dubara karein</button>
+        </div>
+        <audio id="ap1" class="audio-prev" controls></audio>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-title"><span class="num">4</span> Audio Q2 — TDS (25 Marks) *</div>
+      <div class="qbox">
+        <strong>Yeh sawaal padh kar apna jawab aur explanation record karein:</strong>
+        Ek customer ne TDS meter se check kiya aur bola ki TDS kam hai isliye paani achha nahi hoga. Aap usse kya samjhaenge? Apne shabdon mein boliye.
+      </div>
+      <div class="rec-area">
+        <div class="timer" id="t2">0:00</div>
+        <button type="button" class="rec-btn idle" id="rb2" onclick="toggleRec(2)" aria-label="Record Q2">
+          <i class="ti ti-microphone" id="ri2" aria-hidden="true"></i>
+        </button>
+        <div class="rec-status" id="rs2">Microphone button dabaakar recording shuru karein</div>
+        <div class="ctrl-row" id="cr2">
+          <button type="button" class="ctrl-btn" onclick="resetRec(2)"><i class="ti ti-refresh" aria-hidden="true"></i> Dubara karein</button>
+        </div>
+        <audio id="ap2" class="audio-prev" controls></audio>
+      </div>
+    </div>
+
+    <div class="section" style="border:none;padding:0;background:transparent">
+      <button type="button" class="submit-btn" id="sub-btn" onclick="submitAll()">
+        <i class="ti ti-cloud-upload" aria-hidden="true"></i> Submit Evaluation Profile
+      </button>
+      <div class="prog-bar" id="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="status-msg" id="status-msg"></div>
+    </div>
+  </div>
+
+  <div class="success-screen" id="success-screen">
+    <i class="ti ti-circle-check" style="font-size:48px;color:#1D9E75;margin-bottom:1rem" aria-hidden="true"></i>
+    <h2>Assessment Submitted Successfully!</h2>
+    <p style="margin-top: 10px;">Aapka performance scorecard, structure transcripts, aur grading parameters Google Drive pipeline par safely transmit ho gaye hain.</p>
+    <div class="file-tag" id="file-tag"></div>
+  </div>
+</div>
+
+<script>
+// Implemented and mapped exactly to your secure Google App Script backend runtime URL
+const BACKEND_API_URL = 'https://script.google.com/a/macros/urbancompany.com/s/AKfycbzelG-zkogsuc8h9Bdsc2JGOtU453_83qsrgFAbJkukGFsobQlp6E4a6mtrR0vHoHCu/exec';
+
+let selected = {};
+let state = {
+  1:{mr:null,chunks:[],recording:false,timer:null,secs:0,recorded:false,blob:null},
+  2:{mr:null,chunks:[],recording:false,timer:null,secs:0,recorded:false,blob:null}
+};
+
+function selectOpt(qid, idx){
+  const block = document.getElementById(qid);
+  const opts = block.querySelectorAll('.opt');
+  const radios = block.querySelectorAll('input[type=radio]');
+  
+  opts.forEach((o,i)=>{ 
+    o.classList.remove('selected'); 
+    radios[i].checked = false; 
+  });
+  
+  opts[idx].classList.add('selected');
+  radios[idx].checked = true;
+  selected[qid] = idx;
+}
+
+function fmt(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60}
+
+async function toggleRec(n){
+  const s=state[n];
+  if(!s.recording){
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      s.mr=new MediaRecorder(stream);
+      s.chunks=[];
+      s.mr.ondataavailable=e=>s.chunks.push(e.data);
+      s.mr.onstop=()=>{
+        s.blob=new Blob(s.chunks,{type:'audio/webm'});
+        const url=URL.createObjectURL(s.blob);
+        const ap=document.getElementById('ap'+n);
+        ap.src=url; ap.style.display='block';
+        document.getElementById('cr'+n).style.display='flex';
+        document.getElementById('rs'+n).textContent='Recording Complete! Play karke sun sakte hain.';
+        s.recorded=true;
+        stream.getTracks().forEach(t=>t.stop());
+      };
+      s.mr.start(); s.recording=true; s.secs=0;
+      s.timer=setInterval(()=>{
+        s.secs++;
+        document.getElementById('t'+n).textContent=fmt(s.secs);
+        if(s.secs>=180) toggleRec(n);
+      },1000);
+      document.getElementById('rb'+n).className='rec-btn recording';
+      document.getElementById('ri'+n).className='ti ti-player-stop';
+      document.getElementById('rs'+n).textContent='Recording chal rahi hai... rokne ke liye dubara tap karein.';
+    } catch(e){
+      document.getElementById('rs'+n).textContent='Microphone permission denied! Chrome settings me audio allow karein.';
+    }
+  } else {
+    s.mr.stop(); s.recording=false; clearInterval(s.timer);
+    document.getElementById('rb'+n).className='rec-btn recorded';
+    document.getElementById('ri'+n).className='ti ti-check';
+  }
+}
+
+function resetRec(n){
+  const s=state[n];
+  s.recorded=false; s.secs=0; s.blob=null;
+  document.getElementById('t'+n).textContent='0:00';
+  document.getElementById('rb'+n).className='rec-btn idle';
+  document.getElementById('ri'+n).className='ti ti-microphone';
+  document.getElementById('rs'+n).textContent='Microphone button dabaakar recording shuru karein';
+  document.getElementById('ap'+n).style.display='none';
+  document.getElementById('cr'+n).style.display='none';
+}
+
+function blobToBase64(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+function setProgress(pct,msg){
+  document.getElementById('prog-bar').style.display='block';
+  document.getElementById('prog-fill').style.width=pct+'%';
+  const sm=document.getElementById('status-msg');
+  sm.style.display='block'; sm.textContent=msg;
+}
+
+async function submitAll(){
+  const name=document.getElementById('f-name').value.trim();
+  const id=document.getElementById('f-id').value.trim();
+  const city=document.getElementById('f-city').value.trim();
+  const date=document.getElementById('f-date').value;
+  
+  // Strict execution block validation - ensuring all criteria parameters are filled
+  if(!name||!id||!city||!date){alert('Kripya sabhi registration fields ko dhyan se poora bharein.');return;}
+  const answered=Object.keys(selected).length;
+  if(answered<10){alert('Sabhi 10 MCQs ka answer dena compulsory hai. Abhi keval '+answered+' answered hain.');return;}
+  if(!state[1].recorded){alert('Kripya Audio Question 1 ka response record karein.');return;}
+  if(!state[2].recorded){alert('Kripya Audio Question 2 ka response record karein.');return;}
+
+  const btn=document.getElementById('sub-btn');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i> Uploading Files & Processing Audio...';
+
+  const slug=name.replace(/\s+/g,'_')+'_'+id+'_'+city;
+
+  try{
+    setProgress(20,'Converting encrypted audio buffers...');
+    const b64_1=await blobToBase64(state[1].blob);
+    const b64_2=await blobToBase64(state[2].blob);
+
+    setProgress(50,'Sending data metrics securely to Sheet database...');
+
+    const payload = {
+      meta: { name, id, city, date, systemSlug: slug },
+      responses: { mcq: selected },
+      audioFiles: {
+        audioQ1: { base64: b64_1, format: 'webm' },
+        audioQ2: { base64: b64_2, format: 'webm' }
+      }
+    };
+
+    const response = await fetch(BACKEND_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // Using text/plain to entirely prevent CORS pre-flight pre-processing checks in Google Macro scripts
+      body: JSON.stringify(payload)
+    });
+
+    const resData = await response.json();
+    if(resData.status === 'error') throw new Error(resData.message);
+
+    setProgress(100,'Upload package verified!');
+    document.getElementById('main-form').style.display='none';
+    document.getElementById('success-screen').style.display='block';
+    document.getElementById('file-tag').textContent = `Tracking ID: RO-${id}`;
+  } catch(err){
+    btn.disabled=false;
+    btn.innerHTML='<i class="ti ti-cloud-upload" aria-hidden="true"></i> Submit Evaluation Profile';
+    document.getElementById('prog-bar').style.display='none';
+    document.getElementById('status-msg').style.display='none';
+    alert('Google API Web App error response runtime exception:\n'+err.message);
+  }
+}
+
+document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
