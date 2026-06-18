@@ -227,8 +227,6 @@ body{background:#f0f2f5;color:var(--color-text-primary)}
     </div>
   </div>
 
-  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submittedFlag) handleIframeSuccess();"></iframe>
-
   <div class="success-screen" id="success-screen">
     <i class="ti ti-circle-check" style="font-size:48px;color:#1D9E75;margin-bottom:1rem" aria-hidden="true"></i>
     <h2>Assessment Submitted Successfully!</h2>
@@ -238,12 +236,10 @@ body{background:#f0f2f5;color:var(--color-text-primary)}
 </div>
 
 <script>
-// Paste your fresh personal Google Apps Script Web App execution macro URL directly inside the single quotes below
+// Paste your personal macro URL directly inside the single quotes below
 const BACKEND_API_URL = 'PASTE_YOUR_NEW_PERSONAL_GOOGLE_APPS_SCRIPT_URL_HERE';
 
 let selected = {};
-let submittedFlag = false;
-let globalIdRef = "";
 let state = {
   1:{mr:null,chunks:[],recording:false,timer:null,secs:0,recorded:false,blob:null},
   2:{mr:null,chunks:[],recording:false,timer:null,secs:0,recorded:false,blob:null}
@@ -343,7 +339,7 @@ async function submitAll(){
   if(!state[2].recorded){alert('Kripya Audio Question 2 ka response record karein.');return;}
 
   if(BACKEND_API_URL.includes("PASTE_YOUR_NEW_PERSONAL_GOOGLE_APPS_SCRIPT_URL_HERE")){
-    alert("Please change line 203 to your actual Google Apps Script Web App URL first!");
+    alert("Please change line 201 to your actual personal Google Apps Script Web App URL first!");
     return;
   }
 
@@ -352,14 +348,13 @@ async function submitAll(){
   btn.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i> Uploading Files & Processing Audio...';
 
   const slug=name.replace(/\s+/g,'_')+'_'+id+'_'+city;
-  globalIdRef = id;
 
   try{
-    setProgress(30,'Converting multi-part audio files...');
+    setProgress(20,'Converting multi-part audio files...');
     const b64_1=await blobToBase64(state[1].blob);
     const b64_2=await blobToBase64(state[2].blob);
 
-    setProgress(60,'Bypassing cross-origin filters...');
+    setProgress(50,'Bypassing cross-origin browser filters...');
 
     const payload = {
       meta: { name, id, city, date, systemSlug: slug },
@@ -370,38 +365,28 @@ async function submitAll(){
       }
     };
 
-    // Form construction trick to deliver the data bundle natively and prevent CORS errors completely
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = BACKEND_API_URL;
-    form.target = 'hidden_iframe';
+    // Public CORS-Anywhere API proxy middleman handler
+    // This allows the browser to deliver heavy base64 strings cleanly without any CORS block crashes
+    const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(BACKEND_API_URL);
 
-    const textarea = document.createElement('textarea');
-    textarea.name = 'contents';
-    textarea.value = JSON.stringify(payload);
-    form.appendChild(textarea);
+    const response = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-    document.body.appendChild(form);
-    submittedFlag = true;
-    form.submit();
-    
-    setProgress(90,'Finalizing cloud processing matrix...');
-    document.body.removeChild(form);
+    setProgress(100,'Submission verified!');
+    document.getElementById('main-form').style.display='none';
+    document.getElementById('success-screen').style.display='block';
+    document.getElementById('file-tag').textContent = `Tracking ID: RO-${id}`;
 
   } catch(err){
     btn.disabled=false;
     btn.innerHTML='<i class="ti ti-cloud-upload" aria-hidden="true"></i> Submit Evaluation Profile';
     document.getElementById('prog-bar').style.display='none';
     document.getElementById('status-msg').style.display='none';
-    alert('Frontend configuration exception error:\n'+err.message);
+    alert('Submission network error occurred. Please try again:\n'+err.message);
   }
-}
-
-function handleIframeSuccess(){
-  setProgress(100,'Submission verified!');
-  document.getElementById('main-form').style.display='none';
-  document.getElementById('success-screen').style.display='block';
-  document.getElementById('file-tag').textContent = `Tracking ID: RO-${globalIdRef}`;
 }
 
 document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
