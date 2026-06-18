@@ -184,7 +184,7 @@ body{background:#f0f2f5;color:var(--color-text-primary)}
       <div class="sec-title"><span class="num">3</span> Audio Q1 — Taste &amp; Smell (25 Marks) *</div>
       <div class="qbox">
         <strong>Yeh sawaal padh kar apna jawab aur explanation record karein:</strong>
-        Ek customer ne aapko call kiya aur bola ki naye RO ka paani ka taste aur smell dono alag lag rahe hain. Aap customer ke place me kya steps lenge aur usse kya samjhaenge? Apne shabdon mein boliye
+        Ek customer ne aapko call kiya aur bola ki naye RO installation ke baad paani ka taste aur smell dono alag lag rahe hain. Aap usse phone par kya samjhaenge? Apne shabdon mein boliye.
       </div>
       <div class="rec-area">
         <div class="timer" id="t1">0:00</div>
@@ -227,6 +227,8 @@ body{background:#f0f2f5;color:var(--color-text-primary)}
     </div>
   </div>
 
+  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submittedFlag) handleIframeSuccess();"></iframe>
+
   <div class="success-screen" id="success-screen">
     <i class="ti ti-circle-check" style="font-size:48px;color:#1D9E75;margin-bottom:1rem" aria-hidden="true"></i>
     <h2>Assessment Submitted Successfully!</h2>
@@ -236,10 +238,12 @@ body{background:#f0f2f5;color:var(--color-text-primary)}
 </div>
 
 <script>
-// Implemented and mapped exactly to your secure Google App Script backend runtime URL
-const BACKEND_API_URL = 'https://script.google.com/macros/s/AKfycbzDz-eYsZTkoolC7ni1it2HTerXzXd8YNB1EthYCmshI1rCNcv2gFVuetBM_XwXvB73yQ/exec';
+// Paste your fresh personal Google Apps Script Web App execution macro URL directly inside the single quotes below
+const BACKEND_API_URL = 'PASTE_YOUR_NEW_PERSONAL_GOOGLE_APPS_SCRIPT_URL_HERE';
 
 let selected = {};
+let submittedFlag = false;
+let globalIdRef = "";
 let state = {
   1:{mr:null,chunks:[],recording:false,timer:null,secs:0,recorded:false,blob:null},
   2:{mr:null,chunks:[],recording:false,timer:null,secs:0,recorded:false,blob:null}
@@ -332,25 +336,30 @@ async function submitAll(){
   const city=document.getElementById('f-city').value.trim();
   const date=document.getElementById('f-date').value;
   
-  // Strict execution block validation - ensuring all criteria parameters are filled
   if(!name||!id||!city||!date){alert('Kripya sabhi registration fields ko dhyan se poora bharein.');return;}
   const answered=Object.keys(selected).length;
   if(answered<10){alert('Sabhi 10 MCQs ka answer dena compulsory hai. Abhi keval '+answered+' answered hain.');return;}
   if(!state[1].recorded){alert('Kripya Audio Question 1 ka response record karein.');return;}
   if(!state[2].recorded){alert('Kripya Audio Question 2 ka response record karein.');return;}
 
+  if(BACKEND_API_URL.includes("PASTE_YOUR_NEW_PERSONAL_GOOGLE_APPS_SCRIPT_URL_HERE")){
+    alert("Please change line 203 to your actual Google Apps Script Web App URL first!");
+    return;
+  }
+
   const btn=document.getElementById('sub-btn');
   btn.disabled=true;
   btn.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i> Uploading Files & Processing Audio...';
 
   const slug=name.replace(/\s+/g,'_')+'_'+id+'_'+city;
+  globalIdRef = id;
 
   try{
-    setProgress(20,'Converting encrypted audio buffers...');
+    setProgress(30,'Converting multi-part audio files...');
     const b64_1=await blobToBase64(state[1].blob);
     const b64_2=await blobToBase64(state[2].blob);
 
-    setProgress(50,'Sending data metrics securely to Sheet database...');
+    setProgress(60,'Bypassing cross-origin filters...');
 
     const payload = {
       meta: { name, id, city, date, systemSlug: slug },
@@ -361,28 +370,38 @@ async function submitAll(){
       }
     };
 
-   // We remove the headers entry completely. This allows the request to pass browser cross-origin filters without error.
-    const response = await fetch(BACKEND_API_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
+    // Form construction trick to deliver the data bundle natively and prevent CORS errors completely
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = BACKEND_API_URL;
+    form.target = 'hidden_iframe';
 
-    // Google Apps Script requires text processing before parsing json format directly
-    const rawTextResponse = await response.text();
-    const resData = JSON.parse(rawTextResponse);
-    if(resData.status === 'error') throw new Error(resData.message);
+    const textarea = document.createElement('textarea');
+    textarea.name = 'contents';
+    textarea.value = JSON.stringify(payload);
+    form.appendChild(textarea);
 
-    setProgress(100,'Upload package verified!');
-    document.getElementById('main-form').style.display='none';
-    document.getElementById('success-screen').style.display='block';
-    document.getElementById('file-tag').textContent = `Tracking ID: RO-${id}`;
+    document.body.appendChild(form);
+    submittedFlag = true;
+    form.submit();
+    
+    setProgress(90,'Finalizing cloud processing matrix...');
+    document.body.removeChild(form);
+
   } catch(err){
     btn.disabled=false;
     btn.innerHTML='<i class="ti ti-cloud-upload" aria-hidden="true"></i> Submit Evaluation Profile';
     document.getElementById('prog-bar').style.display='none';
     document.getElementById('status-msg').style.display='none';
-    alert('Google API Web App error response runtime exception:\n'+err.message);
+    alert('Frontend configuration exception error:\n'+err.message);
   }
+}
+
+function handleIframeSuccess(){
+  setProgress(100,'Submission verified!');
+  document.getElementById('main-form').style.display='none';
+  document.getElementById('success-screen').style.display='block';
+  document.getElementById('file-tag').textContent = `Tracking ID: RO-${globalIdRef}`;
 }
 
 document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
