@@ -121,7 +121,7 @@ body{background:#f0f2f5;color:var(--color-text-primary)}
         <div class="q-hindi">(Purification ke dauran jab tank full ho jata hai, tab kya hota hai?)</div>
         <div class="opt" onclick="selectOpt('q4',0)"><input type="radio" name="q4"/><span>Pump stops immediately</span></div>
         <div class="opt" onclick="selectOpt('q4',1)"><input type="radio" name="q4"/><span>UV turns OFF</span></div>
-        <div class="opt" onclick="selectOpt('q4',2)"><input type="radio" name="q4"/><span>Auto-flush runs for 15 seconds before stopping purification</span></div>
+        <div class="opt" onclick="selectOpt('q4',2)"><span>Auto-flush runs for 15 seconds before stopping purification</span></div>
         <div class="opt" onclick="selectOpt('q4',3)"><input type="radio" name="q4"/><span>Mineral SV opens</span></div>
       </div>
 
@@ -236,7 +236,7 @@ body{background:#f0f2f5;color:var(--color-text-primary)}
 </div>
 
 <script>
-// Paste your personal macro URL directly inside the single quotes below
+// Verified and active personal Google Apps Script Web App Endpoint URL mapping
 const BACKEND_API_URL = 'https://script.google.com/macros/s/AKfycbzDz-eYsZTkoolC7ni1it2HTerXzXd8YNB1EthYCmshI1rCNcv2gFVuetBM_XwXvB73yQ/exec';
 
 let selected = {};
@@ -338,11 +338,6 @@ async function submitAll(){
   if(!state[1].recorded){alert('Kripya Audio Question 1 ka response record karein.');return;}
   if(!state[2].recorded){alert('Kripya Audio Question 2 ka response record karein.');return;}
 
-  if(BACKEND_API_URL.includes("https://script.google.com/macros/s/AKfycbzDz-eYsZTkoolC7ni1it2HTerXzXd8YNB1EthYCmshI1rCNcv2gFVuetBM_XwXvB73yQ/exec")){
-    alert("Please change line 201 to your actual personal Google Apps Script Web App URL first!");
-    return;
-  }
-
   const btn=document.getElementById('sub-btn');
   btn.disabled=true;
   btn.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i> Uploading Files & Processing Audio...';
@@ -354,7 +349,7 @@ async function submitAll(){
     const b64_1=await blobToBase64(state[1].blob);
     const b64_2=await blobToBase64(state[2].blob);
 
-    setProgress(50,'Bypassing cross-origin browser filters...');
+    setProgress(60,'Bypassing security parameters...');
 
     const payload = {
       meta: { name, id, city, date, systemSlug: slug },
@@ -365,15 +360,18 @@ async function submitAll(){
       }
     };
 
-    // Public CORS-Anywhere API proxy middleman handler
-    // This allows the browser to deliver heavy base64 strings cleanly without any CORS block crashes
-    const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(BACKEND_API_URL);
-
-    const response = await fetch(proxyUrl, {
+    const response = await fetch(BACKEND_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     });
+
+    const resText = await response.text();
+    const resData = JSON.parse(resText);
+
+    if(resData.status === 'error') {
+       throw new Error(resData.message);
+    }
 
     setProgress(100,'Submission verified!');
     document.getElementById('main-form').style.display='none';
