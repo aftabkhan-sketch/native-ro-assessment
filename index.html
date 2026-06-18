@@ -236,8 +236,7 @@ body{background:#f0f2f5;color:var(--color-text-primary)}
 </div>
 
 <script>
-// Verified and active personal Google Apps Script Web App Endpoint URL mapping
-const BACKEND_API_URL = 'https://script.google.com/macros/s/AKfycbzDz-eYsZTkoolC7ni1it2HTerXzXd8YNB1EthYCmshI1rCNcv2gFVuetBM_XwXvB73yQ/exec';
+const BACKEND_API_URL = 'https://script.google.com/macros/s/AKfycbyhUhjd0wL--RsI21sBxJ4_CytPOQ3rJeiSod-13BvorPYHpeNsxqWURfAmln5_AaAUNw/exec';
 
 let selected = {};
 let state = {
@@ -249,12 +248,7 @@ function selectOpt(qid, idx){
   const block = document.getElementById(qid);
   const opts = block.querySelectorAll('.opt');
   const radios = block.querySelectorAll('input[type=radio]');
-  
-  opts.forEach((o,i)=>{ 
-    o.classList.remove('selected'); 
-    radios[i].checked = false; 
-  });
-  
+  opts.forEach((o,i)=>{ o.classList.remove('selected'); radios[i].checked = false; });
   opts[idx].classList.add('selected');
   radios[idx].checked = true;
   selected[qid] = idx;
@@ -331,7 +325,7 @@ async function submitAll(){
   const id=document.getElementById('f-id').value.trim();
   const city=document.getElementById('f-city').value.trim();
   const date=document.getElementById('f-date').value;
-  
+
   if(!name||!id||!city||!date){alert('Kripya sabhi registration fields ko dhyan se poora bharein.');return;}
   const answered=Object.keys(selected).length;
   if(answered<10){alert('Sabhi 10 MCQs ka answer dena compulsory hai. Abhi keval '+answered+' answered hain.');return;}
@@ -349,7 +343,7 @@ async function submitAll(){
     const b64_1=await blobToBase64(state[1].blob);
     const b64_2=await blobToBase64(state[2].blob);
 
-    setProgress(60,'Bypassing security parameters...');
+    setProgress(60,'Uploading to server...');
 
     const payload = {
       meta: { name, id, city, date, systemSlug: slug },
@@ -370,7 +364,7 @@ async function submitAll(){
     const resData = JSON.parse(resText);
 
     if(resData.status === 'error') {
-       throw new Error(resData.message);
+      throw new Error(resData.message);
     }
 
     setProgress(100,'Submission verified!');
